@@ -1,4 +1,4 @@
-package com.nirmal.taskflow_java_api;
+package com.nirmal.taskflow;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
