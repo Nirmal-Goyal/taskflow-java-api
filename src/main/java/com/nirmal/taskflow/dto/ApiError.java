@@ -1,17 +1,18 @@
 package com.nirmal.taskflow.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class ApiError {
 
-    private String message;
     private int status;
-    private LocalDateTime timestamp;
+    private String message;
+    private Instant timestamp;
 
-    public ApiError(String message, int status){
-        this.message = message;
+    public ApiError(int status, String message, Instant timestamp) {
         this.status = status;
-        this.timestamp = LocalDateTime.now();
+        this.message = message;
+        this.timestamp = timestamp;
     }
 
     public String getMessage(){
@@ -22,7 +23,7 @@ public class ApiError {
         return status;
     }
 
-    public LocalDateTime getTimestamp(){
+    public Instant getTimestamp(){
         return timestamp;
     }
 }

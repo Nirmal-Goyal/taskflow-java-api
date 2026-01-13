@@ -5,6 +5,8 @@ import com.nirmal.taskflow.domain.user.UserRole;
 import com.nirmal.taskflow.dto.user.UserLoginRequest;
 import com.nirmal.taskflow.dto.user.UserRegisterRequest;
 import com.nirmal.taskflow.dto.user.UserResponse;
+import com.nirmal.taskflow.exception.BadRequestException;
+import com.nirmal.taskflow.exception.UnauthorizedException;
 import com.nirmal.taskflow.repository.UserRepository;
 import com.nirmal.taskflow.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,7 +27,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse register(UserRegisterRequest request){
 
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email already registered");
+            throw new BadRequestException("Email already registered");
         }
 
         User user  = new User();
@@ -50,10 +52,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or pssword"));
+                .orElseThrow(() -> new UnauthorizedException("Invalid email or pssword"));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            throw new RuntimeException("Invalid password");
+            throw new UnauthorizedException("Invalid password");
         }
 
         return new UserResponse(
