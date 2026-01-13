@@ -1,14 +1,13 @@
 package com.nirmal.taskflow.controller;
 
+import com.nirmal.taskflow.dto.user.UserLoginRequest;
 import com.nirmal.taskflow.dto.user.UserRegisterRequest;
+import com.nirmal.taskflow.dto.user.UserResponse;
 import com.nirmal.taskflow.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,12 +20,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponse register(
             @Valid
             @RequestBody
             UserRegisterRequest request
     ){
-        userService.registerUser(request);
-        return new ResponseEntity<>("User registerion request received", HttpStatus.CREATED);
+        return userService.register(request);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(
+            @Valid
+            @RequestBody
+            UserLoginRequest request
+    ){
+        return ResponseEntity.ok(userService.login(request));
     }
 }

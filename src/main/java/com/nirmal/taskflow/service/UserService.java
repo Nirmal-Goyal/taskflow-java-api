@@ -1,7 +1,10 @@
 package com.nirmal.taskflow.service;
 
+import com.nirmal.taskflow.dto.user.UserLoginRequest;
 import com.nirmal.taskflow.dto.user.UserRegisterRequest;
+import com.nirmal.taskflow.dto.user.UserResponse;
 
 public interface UserService {
-    void registerUser(UserRegisterRequest request);
+    UserResponse register(UserRegisterRequest request);
+    UserResponse login(UserLoginRequest request);
 }
