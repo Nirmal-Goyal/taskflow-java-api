@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse login(UserLoginRequest request){
+    public User login(UserLoginRequest request){
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or pssword"));
 
@@ -58,13 +58,7 @@ public class UserServiceImpl implements UserService {
             throw new UnauthorizedException("Invalid password");
         }
 
-        return new UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole(),
-                user.getCreatedAt()
-        );
+        return user;
     }
 
 }
