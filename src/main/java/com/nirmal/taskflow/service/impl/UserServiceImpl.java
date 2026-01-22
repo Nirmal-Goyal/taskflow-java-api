@@ -2,6 +2,7 @@ package com.nirmal.taskflow.service.impl;
 
 import com.nirmal.taskflow.domain.user.User;
 import com.nirmal.taskflow.domain.user.UserRole;
+import com.nirmal.taskflow.dto.user.UpdateUserRoleRequest;
 import com.nirmal.taskflow.dto.user.UserLoginRequest;
 import com.nirmal.taskflow.dto.user.UserRegisterRequest;
 import com.nirmal.taskflow.dto.user.UserResponse;
@@ -9,6 +10,7 @@ import com.nirmal.taskflow.exception.BadRequestException;
 import com.nirmal.taskflow.exception.UnauthorizedException;
 import com.nirmal.taskflow.repository.UserRepository;
 import com.nirmal.taskflow.service.UserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -90,6 +92,31 @@ public class UserServiceImpl implements UserService {
                         user.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Override
+    public UserResponse updateUserRole(UUID userId, UpdateUserRoleRequest request){
+
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if(userId.toString().equals(currentUserId)){
+            throw new BadRequestException("You cannot update yourself as you are already logged in");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setRole(request.getRole());
+
+        User updatedUser = userRepository.save(user);
+
+        return new UserResponse(
+                updatedUser.getId(),
+                updatedUser.getName(),
+                updatedUser.getEmail(),
+                updatedUser.getRole(),
+                updatedUser.getCreatedAt()
+        );
     }
 
 }

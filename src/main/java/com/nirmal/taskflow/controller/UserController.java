@@ -1,15 +1,16 @@
 package com.nirmal.taskflow.controller;
 
+import com.nirmal.taskflow.dto.user.UpdateUserRoleRequest;
 import com.nirmal.taskflow.dto.user.UserResponse;
 import com.nirmal.taskflow.repository.UserRepository;
 import com.nirmal.taskflow.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -35,5 +36,13 @@ public class UserController {
         String userId = authentication.getName();
 
         return userService.getCurrentUser(userId);
+    }
+
+    @PatchMapping("/{id}/role")
+    public UserResponse updateUserRole(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateUserRoleRequest request
+            ){
+        return userService.updateUserRole(id, request);
     }
 }
