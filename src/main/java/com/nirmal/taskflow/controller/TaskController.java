@@ -1,0 +1,48 @@
+package com.nirmal.taskflow.controller;
+
+import com.nirmal.taskflow.dto.task.CreateTaskRequest;
+import com.nirmal.taskflow.dto.task.TaskResponse;
+import com.nirmal.taskflow.service.TaskService;
+import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/tasks")
+public class TaskController {
+
+    private final TaskService taskService;
+
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    private Authentication auth(){
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    private boolean isAdmin(){
+        return auth().getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    @PostMapping
+    public TaskResponse create(
+            @Valid
+            @RequestBody CreateTaskRequest request
+            ){
+        return taskService.createTask(auth().getName(), request, isAdmin());
+    }
+
+    @GetMapping("/project/{projectId}")
+    public List<TaskResponse> getByProject(
+            @PathVariable UUID projectId
+            ){
+        return taskService.getTasksByProject(projectId, auth().getName(), isAdmin());
+    }
+}
