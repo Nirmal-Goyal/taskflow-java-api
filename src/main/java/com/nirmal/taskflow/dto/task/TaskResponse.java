@@ -1,5 +1,7 @@
 package com.nirmal.taskflow.dto.task;
 
+import com.nirmal.taskflow.domain.task.TaskStatus;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -11,12 +13,15 @@ public class TaskResponse {
     private UUID projectId;
     private Instant createdAt;
 
-    public TaskResponse(UUID id, String title, String description, UUID projectId, Instant createdAt) {
+    private TaskStatus status;
+
+    public TaskResponse(UUID id, String title, String description, UUID projectId, Instant createdAt, TaskStatus status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.projectId = projectId;
         this.createdAt = createdAt;
+        this.status = status;
     }
 
     public UUID getId() {
@@ -37,5 +42,9 @@ public class TaskResponse {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
     }
 }

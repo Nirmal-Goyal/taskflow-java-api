@@ -2,6 +2,7 @@ package com.nirmal.taskflow.controller;
 
 import com.nirmal.taskflow.dto.task.CreateTaskRequest;
 import com.nirmal.taskflow.dto.task.TaskResponse;
+import com.nirmal.taskflow.dto.task.UpdateTaskStatusRequest;
 import com.nirmal.taskflow.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -44,5 +45,18 @@ public class TaskController {
             @PathVariable UUID projectId
             ){
         return taskService.getTasksByProject(projectId, auth().getName(), isAdmin());
+    }
+
+    @PatchMapping("/{taskId}/status")
+    public TaskResponse updateStatus(
+            @PathVariable UUID taskId,
+            @Valid @RequestBody UpdateTaskStatusRequest request
+    ){
+        return taskService.updateStatus(
+                taskId,
+                auth().getName(),
+                request,
+                isAdmin()
+        );
     }
 }
