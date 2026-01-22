@@ -12,6 +12,9 @@ import com.nirmal.taskflow.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -59,6 +62,34 @@ public class UserServiceImpl implements UserService {
         }
 
         return user;
+    }
+
+    @Override
+    public UserResponse getCurrentUser(String userId){
+        User user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getCreatedAt()
+        );
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> new UserResponse(
+                        user.getId(),
+                        user.getName(),
+                        user.getEmail(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ))
+                .toList();
     }
 
 }

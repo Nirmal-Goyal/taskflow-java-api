@@ -5,7 +5,13 @@ import com.nirmal.taskflow.dto.user.UserLoginRequest;
 import com.nirmal.taskflow.dto.user.UserRegisterRequest;
 import com.nirmal.taskflow.dto.user.UserResponse;
 
+import java.util.List;
+
 public interface UserService {
     UserResponse register(UserRegisterRequest request);
     User login(UserLoginRequest request);
+
+    UserResponse getCurrentUser(String userId);
+
+    List<UserResponse> getAllUsers();
 }

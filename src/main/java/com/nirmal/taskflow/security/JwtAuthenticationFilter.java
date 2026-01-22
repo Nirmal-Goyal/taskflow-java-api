@@ -1,25 +1,30 @@
 package com.nirmal.taskflow.security;
 
+import com.nirmal.taskflow.domain.user.User;
+import com.nirmal.taskflow.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
-@Component
+
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
-
+    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -39,12 +44,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             String userId = jwtService.extractUserId(token);
 
-            var auth = new UsernamePasswordAuthenticationToken(
+            User user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            var authority = new SimpleGrantedAuthority(
+                    "ROLE_" + user.getRole().name()
+            );
+
+            var authentication = new UsernamePasswordAuthenticationToken(
                     userId,
                     null,
-                    List.of()
+                    List.of(authority)
             );
-            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         catch(Exception ex){
             SecurityContextHolder.clearContext();
