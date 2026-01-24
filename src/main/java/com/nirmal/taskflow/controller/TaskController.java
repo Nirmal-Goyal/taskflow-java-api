@@ -2,10 +2,13 @@ package com.nirmal.taskflow.controller;
 
 import com.nirmal.taskflow.dto.task.CreateTaskRequest;
 import com.nirmal.taskflow.dto.task.TaskResponse;
+import com.nirmal.taskflow.dto.task.UpdateTaskAssigneeRequest;
 import com.nirmal.taskflow.dto.task.UpdateTaskStatusRequest;
 import com.nirmal.taskflow.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,10 +56,26 @@ public class TaskController {
             @Valid @RequestBody UpdateTaskStatusRequest request
     ){
         return taskService.updateStatus(
+                        taskId,
+                        auth().getName(),
+                        request
+        );
+    }
+
+    @PatchMapping("/{taskId}/assignee")
+    public TaskResponse updateAssignee(
+            @PathVariable UUID taskId,
+            @Valid @RequestBody UpdateTaskAssigneeRequest request
+            ){
+        return taskService.updateTaskAssignee(
                 taskId,
                 auth().getName(),
-                request,
-                isAdmin()
+                request
         );
+    }
+
+    @GetMapping("/me")
+    public List<TaskResponse> myTasks(){
+        return taskService.getMyTasks(auth().getName());
     }
 }

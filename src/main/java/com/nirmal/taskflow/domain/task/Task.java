@@ -1,6 +1,7 @@
 package com.nirmal.taskflow.domain.task;
 
 import com.nirmal.taskflow.domain.project.Project;
+import com.nirmal.taskflow.domain.user.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -23,6 +24,10 @@ public class Task {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
 
     @CreationTimestamp
     private Instant createdAt;
@@ -61,6 +66,14 @@ public class Task {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public User getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
     }
 
     public Instant getCreatedAt() {

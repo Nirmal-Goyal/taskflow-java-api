@@ -48,4 +48,16 @@ public class ProjectController {
 
         return projectService.getProjectById(id, auth().getName(), isAdmin);
     }
+
+    @PostMapping("/{projectId}/members/{memberId}")
+    public void addMember(
+            @PathVariable UUID projectId,
+            @PathVariable UUID memberId
+    ){
+        projectService.addMember(
+                projectId,
+                memberId,
+                auth().getName()
+        );
+    }
 }

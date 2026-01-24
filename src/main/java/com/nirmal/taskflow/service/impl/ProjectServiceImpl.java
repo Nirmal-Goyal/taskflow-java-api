@@ -4,6 +4,7 @@ import com.nirmal.taskflow.domain.project.Project;
 import com.nirmal.taskflow.domain.user.User;
 import com.nirmal.taskflow.dto.project.CreateProjectRequest;
 import com.nirmal.taskflow.dto.project.ProjectResponse;
+import com.nirmal.taskflow.exception.BadRequestException;
 import com.nirmal.taskflow.exception.UnauthorizedException;
 import com.nirmal.taskflow.repository.ProjectRepository;
 import com.nirmal.taskflow.repository.UserRepository;
@@ -32,6 +33,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = new Project();
         project.setName(request.getName());
         project.setOwner(owner);
+        project.getMembers().add(owner);
 
         Project saved = projectRepository.save(project);
 
@@ -59,6 +61,26 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         return map(project);
+    }
+
+    @Override
+    public void addMember(UUID projectId, UUID memberId, String userId){
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if(!project.getOwner().getId().toString().equals(userId)){
+            throw new UnauthorizedException("Only owner can add members");
+        }
+
+        User user = userRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if(project.getMembers().contains(user)){
+            throw new BadRequestException("User already a member of this project");
+        }
+
+        project.getMembers().add(user);
+        projectRepository.save(project);
     }
 
     private ProjectResponse map(Project p){

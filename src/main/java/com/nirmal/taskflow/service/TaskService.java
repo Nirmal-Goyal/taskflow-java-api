@@ -2,6 +2,7 @@ package com.nirmal.taskflow.service;
 
 import com.nirmal.taskflow.dto.task.CreateTaskRequest;
 import com.nirmal.taskflow.dto.task.TaskResponse;
+import com.nirmal.taskflow.dto.task.UpdateTaskAssigneeRequest;
 import com.nirmal.taskflow.dto.task.UpdateTaskStatusRequest;
 
 import java.util.List;
@@ -16,7 +17,14 @@ public interface TaskService {
     TaskResponse updateStatus(
             UUID taskId,
             String userId,
-            UpdateTaskStatusRequest request,
-            boolean isAdmin
+            UpdateTaskStatusRequest request
     );
+
+    TaskResponse updateTaskAssignee(
+            UUID taskId,
+            String userId,
+            UpdateTaskAssigneeRequest request
+    );
+
+    List<TaskResponse> getMyTasks(String userId);
 }

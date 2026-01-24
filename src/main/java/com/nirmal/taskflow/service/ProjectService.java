@@ -13,4 +13,6 @@ public interface ProjectService {
     List<ProjectResponse> getMyProjects(String userId);
 
     ProjectResponse getProjectById(UUID projectId, String userId, boolean isAdmin);
+
+    void addMember(UUID projectId, UUID memberId, String name);
 }
