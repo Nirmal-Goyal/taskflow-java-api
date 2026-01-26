@@ -15,4 +15,6 @@ public interface ProjectService {
     ProjectResponse getProjectById(UUID projectId, String userId, boolean isAdmin);
 
     void addMember(UUID projectId, UUID memberId, String name);
+
+    void deleteProject(UUID projectId, String userId, boolean isAdmin);
 }

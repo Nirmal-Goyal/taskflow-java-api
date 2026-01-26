@@ -1,11 +1,13 @@
 package com.nirmal.taskflow.controller;
 
+import com.nirmal.taskflow.domain.task.TaskStatus;
 import com.nirmal.taskflow.dto.task.CreateTaskRequest;
 import com.nirmal.taskflow.dto.task.TaskResponse;
 import com.nirmal.taskflow.dto.task.UpdateTaskAssigneeRequest;
 import com.nirmal.taskflow.dto.task.UpdateTaskStatusRequest;
 import com.nirmal.taskflow.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -58,7 +60,8 @@ public class TaskController {
         return taskService.updateStatus(
                         taskId,
                         auth().getName(),
-                        request
+                        request,
+                        isAdmin()
         );
     }
 
@@ -75,7 +78,28 @@ public class TaskController {
     }
 
     @GetMapping("/me")
-    public List<TaskResponse> myTasks(){
-        return taskService.getMyTasks(auth().getName());
+    public Page<TaskResponse> myTasks(
+            @RequestParam(required = false)TaskStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+            ){
+        return taskService.getMyTasks(
+                auth().getName(),
+                status,
+                page,
+                size
+        );
+    }
+
+    @DeleteMapping("{taskId}")
+    public ResponseEntity<Void> deleteTask(
+            @PathVariable UUID taskId
+    ){
+        taskService.deleteTask(
+                taskId,
+                auth().getName()
+        );
+
+        return ResponseEntity.noContent().build();
     }
 }

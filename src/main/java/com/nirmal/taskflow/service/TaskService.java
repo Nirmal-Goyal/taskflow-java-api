@@ -1,9 +1,11 @@
 package com.nirmal.taskflow.service;
 
+import com.nirmal.taskflow.domain.task.TaskStatus;
 import com.nirmal.taskflow.dto.task.CreateTaskRequest;
 import com.nirmal.taskflow.dto.task.TaskResponse;
 import com.nirmal.taskflow.dto.task.UpdateTaskAssigneeRequest;
 import com.nirmal.taskflow.dto.task.UpdateTaskStatusRequest;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +19,8 @@ public interface TaskService {
     TaskResponse updateStatus(
             UUID taskId,
             String userId,
-            UpdateTaskStatusRequest request
+            UpdateTaskStatusRequest request,
+            boolean isAdmin
     );
 
     TaskResponse updateTaskAssignee(
@@ -26,5 +29,12 @@ public interface TaskService {
             UpdateTaskAssigneeRequest request
     );
 
-    List<TaskResponse> getMyTasks(String userId);
+    Page<TaskResponse> getMyTasks(
+            String userId,
+            TaskStatus status,
+            int page,
+            int size
+    );
+
+    void deleteTask(UUID taskId, String userId);
 }

@@ -14,6 +14,10 @@ import com.nirmal.taskflow.repository.ProjectRepository;
 import com.nirmal.taskflow.repository.TaskRepository;
 import com.nirmal.taskflow.repository.UserRepository;
 import com.nirmal.taskflow.service.TaskService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -96,15 +100,25 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse updateStatus(
             UUID taskId,
             String userId,
-            UpdateTaskStatusRequest request
+            UpdateTaskStatusRequest request,
+            boolean isAdmin
     ) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
+        if(!isAdmin){
+            if(task.getAssignee() == null){
+                throw new BadRequestException("Task must be assigned before updating status");
+            }
+        }
+
         Project project = task.getProject();
 
-        if (!project.getOwner().getId().toString().equals(userId)) {
-            throw new UnauthorizedException("You are not the project owner");
+        boolean isOwner = project.getOwner().getId().toString().equals(userId);
+        boolean isAssignee = task.getAssignee().getId().toString().equals(userId);
+
+        if(!isOwner && !isAssignee){
+            throw new UnauthorizedException("You do not own this project");
         }
 
         validateTransition(task.getStatus(), request.getStatus());
@@ -136,6 +150,10 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not Found"));
 
+        if(task.getStatus() == TaskStatus.COMPLETED){
+            throw new BadRequestException("Completed tasks cannot be reassigned");
+        }
+
         Project project = task.getProject();
 
         if(!project.getOwner().getId().toString().equals(userId)){
@@ -152,20 +170,56 @@ public class TaskServiceImpl implements TaskService {
 
         task.setAssignee(assignee);
 
+        if (task.getStatus() == TaskStatus.TODO){
+            task.setStatus(TaskStatus.IN_PROGRESS);
+        }
+
         Task updated = taskRepository.save(task);
 
         return map(updated);
     }
 
     @Override
-    public List<TaskResponse> getMyTasks(String userId) {
+    public Page<TaskResponse> getMyTasks(
+            String userId,
+            TaskStatus status,
+            int page,
+            int size
+    ) {
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return taskRepository.findByAssignee(user)
-                .stream()
-                .map(this::map)
-                .toList();
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Task> tasks;
+
+        if(status == null){
+            tasks = taskRepository.findByAssignee(user, pageable);
+        }
+        else {
+            tasks = taskRepository.findByAssigneeAndStatus(user, status, pageable);
+        }
+
+        return tasks.map(this::map);
+    }
+
+    @Override
+    public void deleteTask(UUID taskId, String userId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        Project project = task.getProject();
+
+        if(!project.getOwner().getId().toString().equals(userId)){
+            throw new UnauthorizedException("Only project owner can delete tasks");
+        }
+
+        task.setDeleted(true);
+        taskRepository.save(task);
     }
 
     private TaskResponse map(Task task){

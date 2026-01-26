@@ -7,8 +7,10 @@ import com.nirmal.taskflow.dto.project.ProjectResponse;
 import com.nirmal.taskflow.exception.BadRequestException;
 import com.nirmal.taskflow.exception.UnauthorizedException;
 import com.nirmal.taskflow.repository.ProjectRepository;
+import com.nirmal.taskflow.repository.TaskRepository;
 import com.nirmal.taskflow.repository.UserRepository;
 import com.nirmal.taskflow.service.ProjectService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +21,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository, UserRepository userRepository) {
+    public ProjectServiceImpl(ProjectRepository projectRepository, UserRepository userRepository, TaskRepository taskRepository) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
     }
 
     @Override
@@ -80,6 +84,23 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         project.getMembers().add(user);
+        projectRepository.save(project);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProject(UUID projectId, String userId, boolean isAdmin){
+        Project project = projectRepository.findIncludingDeleted(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if(!isAdmin && !project.getOwner().getId().toString().equals(userId)){
+            throw new UnauthorizedException("Only owner or admin can delete projects");
+        }
+
+        project.setDeleted(true);
+
+        taskRepository.softDeleteByProject(project);
+
         projectRepository.save(project);
     }
 

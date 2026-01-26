@@ -4,11 +4,13 @@ import com.nirmal.taskflow.domain.project.Project;
 import com.nirmal.taskflow.domain.user.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Where;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Where(clause = "deleted = false")
 @Table(name = "tasks")
 public class Task {
 
@@ -35,6 +37,9 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskStatus status = TaskStatus.TODO;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     public UUID getId() {
         return id;
@@ -90,5 +95,13 @@ public class Task {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

@@ -4,6 +4,7 @@ import com.nirmal.taskflow.dto.project.CreateProjectRequest;
 import com.nirmal.taskflow.dto.project.ProjectResponse;
 import com.nirmal.taskflow.service.ProjectService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -59,5 +60,22 @@ public class ProjectController {
                 memberId,
                 auth().getName()
         );
+    }
+
+    @DeleteMapping("/{projectId}")
+    public ResponseEntity<Void> deleteProject(
+            @PathVariable UUID projectId
+    ){
+        boolean isAdmin = auth().getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        projectService.deleteProject(
+                projectId,
+                auth().getName(),
+                isAdmin
+        );
+
+        return ResponseEntity.noContent().build();
     }
 }

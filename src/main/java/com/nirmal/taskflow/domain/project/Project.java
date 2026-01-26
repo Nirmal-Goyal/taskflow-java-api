@@ -3,6 +3,7 @@ package com.nirmal.taskflow.domain.project;
 import com.nirmal.taskflow.domain.user.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Where;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Where(clause = "deleted = false")
 @Table(name = "projects")
 public class Project {
 
@@ -31,6 +33,9 @@ public class Project {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> members = new ArrayList<>();
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     @CreationTimestamp
     private Instant createdAt;
@@ -61,6 +66,14 @@ public class Project {
 
     public List<User> getMembers() {
         return members;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public void setMembers(List<User> members) {
